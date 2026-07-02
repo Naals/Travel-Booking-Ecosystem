@@ -51,6 +51,7 @@
           common-lib
   -->
   <modules>
+    <module>shared-kernel</module>
   </modules>
 
   <properties>

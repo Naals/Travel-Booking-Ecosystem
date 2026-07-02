@@ -1,7 +1,7 @@
 # Service implementation status
 
-Single source of truth for "has this service been started yet."
-Updated in the same commit whenever a service moves between states.
+> Shared modules (shared-kernel, common-lib) are prerequisites for all
+> services and are tracked below the main table.
 
 | # | Service | Tier | Status | First commit |
 |---|---|---|---|---|
@@ -27,5 +27,8 @@ Updated in the same commit whenever a service moves between states.
 | 20 | analytics-service | 4 | not started | — |
 | 21 | audit-service | 4 | not started | — |
 
-Statuses: `not started` → `scaffolded` (POM + dirs, no logic) →
-`in progress` → `core complete` (domain + tests passing).
+## Shared modules
+| Module | Status |
+|---|---|
+| shared-kernel | in progress |
+| common-lib | not started |
