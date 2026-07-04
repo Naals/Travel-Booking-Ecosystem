@@ -30,5 +30,5 @@
 ## Shared modules
 | Module | Status |
 |---|---|
-| shared-kernel | in progress |
+| shared-kernel | ✅ core complete |
 | common-lib | not started |
