@@ -52,6 +52,7 @@
   -->
   <modules>
     <module>shared-kernel</module>
+    <module>common-lib</module>
   </modules>
 
   <properties>
