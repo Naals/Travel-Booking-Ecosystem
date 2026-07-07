@@ -8,6 +8,24 @@
         <option value="$PROJECT_DIR$/shared-kernel/pom.xml" />
         <option value="$PROJECT_DIR$/common-lib/pom.xml" />
         <option value="$PROJECT_DIR$/demo/pom.xml" />
+        <option value="$PROJECT_DIR$/identity-service/pom.xml" />
+        <option value="$PROJECT_DIR$/booking-service/pom.xml" />
+        <option value="$PROJECT_DIR$/payment-service/pom.xml" />
+        <option value="$PROJECT_DIR$/notification-service/pom.xml" />
+        <option value="$PROJECT_DIR$/property-service/pom.xml" />
+        <option value="$PROJECT_DIR$/hotel-service/pom.xml" />
+        <option value="$PROJECT_DIR$/flight-service/pom.xml" />
+        <option value="$PROJECT_DIR$/vehicle-service/pom.xml" />
+        <option value="$PROJECT_DIR$/search-service/pom.xml" />
+        <option value="$PROJECT_DIR$/user-service/pom.xml" />
+        <option value="$PROJECT_DIR$/review-service/pom.xml" />
+        <option value="$PROJECT_DIR$/messaging-service/pom.xml" />
+        <option value="$PROJECT_DIR$/wallet-service/pom.xml" />
+        <option value="$PROJECT_DIR$/loyalty-service/pom.xml" />
+        <option value="$PROJECT_DIR$/recommendation-service/pom.xml" />
+        <option value="$PROJECT_DIR$/fraud-service/pom.xml" />
+        <option value="$PROJECT_DIR$/analytics-service/pom.xml" />
+        <option value="$PROJECT_DIR$/audit-service/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
