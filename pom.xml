@@ -51,8 +51,39 @@
           common-lib
   -->
   <modules>
+    <!-- Shared -->
     <module>shared-kernel</module>
     <module>common-lib</module>
+
+    <!-- Tier 0 — Platform infrastructure -->
+    <module>discovery-server</module>
+    <module>config-server</module>
+
+    <!-- Tier 1 — Core saga (scaffolded, implemented from Day 5) -->
+    <module>identity-service</module>
+    <module>booking-service</module>
+    <module>payment-service</module>
+    <module>notification-service</module>
+
+    <!-- Tier 2 — Inventory + search (scaffolded, implemented from Day 8) -->
+    <module>property-service</module>
+    <module>hotel-service</module>
+    <module>flight-service</module>
+    <module>vehicle-service</module>
+    <module>search-service</module>
+
+    <!-- Tier 3 — Engagement (scaffolded, implemented from Day 13) -->
+    <module>user-service</module>
+    <module>review-service</module>
+    <module>messaging-service</module>
+    <module>wallet-service</module>
+    <module>loyalty-service</module>
+
+    <!-- Tier 4 — Intelligence + operations (scaffolded, from Day 18) -->
+    <module>recommendation-service</module>
+    <module>fraud-service</module>
+    <module>analytics-service</module>
+    <module>audit-service</module>
   </modules>
 
   <properties>
