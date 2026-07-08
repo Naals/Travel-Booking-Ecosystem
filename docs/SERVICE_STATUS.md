@@ -1,12 +1,12 @@
 # Service implementation status
 
-> Shared modules (shared-kernel, common-lib) are prerequisites for all
-> services and are tracked below the main table.
+> Updated atomically with every service-level commit.
+> Shared modules tracked in the table at the bottom.
 
-| # | Service | Tier | Status | First commit |
+| # | Service | Tier | Status | Day |
 |---|---|---|---|---|
-| 1 | discovery-server | 0 | not started | — |
-| 2 | config-server | 0 | not started | — |
+| 1 | discovery-server | 0 | ✅ core complete | Day 4 |
+| 2 | config-server | 0 | ✅ core complete | Day 4 |
 | 3 | api-gateway | 0 | not started | — |
 | 4 | identity-service | 1 | not started | — |
 | 5 | booking-service | 1 | not started | — |
@@ -28,7 +28,7 @@
 | 21 | audit-service | 4 | not started | — |
 
 ## Shared modules
-| Module | Status |
-|---|---|
-| shared-kernel | ✅ core complete |
-| common-lib | ✅ core complete |
+| Module | Status | Day |
+|---|---|---|
+| shared-kernel | ✅ core complete | Day 2 |
+| common-lib | ✅ core complete | Day 3 |
