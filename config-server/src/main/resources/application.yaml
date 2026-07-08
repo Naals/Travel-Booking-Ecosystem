@@ -1,3 +1,50 @@
+server:
+  port: 8888
+
 spring:
   application:
     name: config-server
+  profiles:
+    # 'native' for local dev (classpath), 'git' for production
+    active: ${SPRING_PROFILES_ACTIVE:native}
+  cloud:
+    config:
+      server:
+        native:
+          # Local dev: configs live in classpath:/config/
+          search-locations: classpath:/config
+        git:
+          # Production: configs fetched from private Git repo
+          uri: ${CONFIG_GIT_URI:}
+          default-label: main
+          clone-on-start: false
+          force-pull: true
+  security:
+    user:
+      name: ${CONFIG_USERNAME:config}
+      password: ${CONFIG_PASSWORD:config}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USERNAME:admin}:${EUREKA_PASSWORD:admin}@${EUREKA_HOST:localhost}:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus, refresh, busrefresh
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    com.travel.config: INFO
+    org.springframework.cloud.config: WARN
