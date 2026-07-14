@@ -1,13 +1,10 @@
 # Service implementation status
 
-> Updated atomically with every service-level commit.
-> Shared modules tracked in the table at the bottom.
-
 | # | Service | Tier | Status | Day |
 |---|---|---|---|---|
 | 1 | discovery-server | 0 | ✅ core complete | Day 4 |
 | 2 | config-server | 0 | ✅ core complete | Day 4 |
-| 3 | api-gateway | 0 | not started | — |
+| 3 | api-gateway | 0 | ✅ core complete | Day 5 |
 | 4 | identity-service | 1 | not started | — |
 | 5 | booking-service | 1 | not started | — |
 | 6 | payment-service | 1 | not started | — |
