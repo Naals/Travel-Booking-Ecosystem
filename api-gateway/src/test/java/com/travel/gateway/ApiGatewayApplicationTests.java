@@ -1,4 +1,4 @@
-package com.travel.apigateway;
+package com.travel.gateway;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
