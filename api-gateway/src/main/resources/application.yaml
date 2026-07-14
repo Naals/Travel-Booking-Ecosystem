@@ -1,3 +1,313 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: api-gateway
+
+  cloud:
+    gateway:
+      # Auto-register routes from Eureka service IDs (lb://service-name)
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      # Global CORS — tighten in production
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+
+      routes:
+
+        # ── Tier 1: Core saga ────────────────────────────────────────────────
+
+        - id: identity-service
+          uri: lb://identity-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: identity-cb
+                fallbackUri: forward:/fallback/identity
+
+        - id: booking-service
+          uri: lb://booking-service
+          predicates:
+            - Path=/api/v1/bookings/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: booking-cb
+                fallbackUri: forward:/fallback/booking
+
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/v1/payments/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: payment-cb
+                fallbackUri: forward:/fallback/payment
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/notifications/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: notification-cb
+                fallbackUri: forward:/fallback/notification
+
+        # ── Tier 2: Inventory + search ───────────────────────────────────────
+
+        - id: property-service
+          uri: lb://property-service
+          predicates:
+            - Path=/api/v1/properties/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 30
+                redis-rate-limiter.burstCapacity: 60
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: property-cb
+                fallbackUri: forward:/fallback/property
+
+        - id: hotel-service
+          uri: lb://hotel-service
+          predicates:
+            - Path=/api/v1/hotels/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: hotel-cb
+                fallbackUri: forward:/fallback/property
+
+        - id: flight-service
+          uri: lb://flight-service
+          predicates:
+            - Path=/api/v1/flights/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: flight-cb
+                fallbackUri: forward:/fallback/property
+
+        - id: vehicle-service
+          uri: lb://vehicle-service
+          predicates:
+            - Path=/api/v1/vehicles/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: vehicle-cb
+                fallbackUri: forward:/fallback/property
+
+        - id: search-service
+          uri: lb://search-service
+          predicates:
+            - Path=/api/v1/search/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 50
+                redis-rate-limiter.burstCapacity: 100
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: search-cb
+                fallbackUri: forward:/fallback/search
+
+        # ── Tier 3: Engagement ───────────────────────────────────────────────
+
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 20
+                redis-rate-limiter.burstCapacity: 40
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: user-cb
+                fallbackUri: forward:/fallback/user
+
+        - id: review-service
+          uri: lb://review-service
+          predicates:
+            - Path=/api/v1/reviews/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: review-cb
+                fallbackUri: forward:/fallback/user
+
+        - id: messaging-service
+          uri: lb://messaging-service
+          predicates:
+            - Path=/api/v1/messages/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: messaging-cb
+                fallbackUri: forward:/fallback/user
+
+        - id: wallet-service
+          uri: lb://wallet-service
+          predicates:
+            - Path=/api/v1/wallet/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
+                key-resolver: "#{@userKeyResolver}"
+            - name: CircuitBreaker
+              args:
+                name: wallet-cb
+                fallbackUri: forward:/fallback/user
+
+        - id: loyalty-service
+          uri: lb://loyalty-service
+          predicates:
+            - Path=/api/v1/loyalty/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: loyalty-cb
+                fallbackUri: forward:/fallback/user
+
+        # ── Tier 4: Intelligence + operations ───────────────────────────────
+
+        - id: recommendation-service
+          uri: lb://recommendation-service
+          predicates:
+            - Path=/api/v1/recommendations/**
+
+        - id: analytics-service
+          uri: lb://analytics-service
+          predicates:
+            - Path=/api/v1/analytics/**
+
+        - id: audit-service
+          uri: lb://audit-service
+          predicates:
+            - Path=/api/v1/audit/**
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+jwt:
+  secret: ${JWT_SECRET:change-me-in-production-must-be-256-bits}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://${EUREKA_USERNAME:admin}:${EUREKA_PASSWORD:admin}@${EUREKA_HOST:localhost}:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      identity-cb:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+      booking-cb:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 15s
+        permittedNumberOfCallsInHalfOpenState: 3
+      payment-cb:
+        slidingWindowSize: 5
+        failureRateThreshold: 40
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 2
+      search-cb:
+        slidingWindowSize: 20
+        failureRateThreshold: 60
+        waitDurationInOpenState: 5s
+  timelimiter:
+    instances:
+      default:
+        timeoutDuration: 5s
+      payment-cb:
+        timeoutDuration: 10s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, prometheus, gateway
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1.0
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: identity-service
+        url: /v3/api-docs/identity-service
+      - name: booking-service
+        url: /v3/api-docs/booking-service
+      - name: payment-service
+        url: /v3/api-docs/payment-service
+      - name: property-service
+        url: /v3/api-docs/property-service
+      - name: search-service
+        url: /v3/api-docs/search-service
+      - name: user-service
+        url: /v3/api-docs/user-service
+
+logging:
+  level:
+    com.travel.gateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+    io.github.resilience4j: INFO
