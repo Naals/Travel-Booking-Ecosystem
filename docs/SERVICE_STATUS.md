@@ -5,7 +5,7 @@
 | 1 | discovery-server | 0 | ✅ core complete | Day 4 |
 | 2 | config-server | 0 | ✅ core complete | Day 4 |
 | 3 | api-gateway | 0 | ✅ core complete | Day 5 |
-| 4 | identity-service | 1 | not started | — |
+| 4 | identity-service | 1 | ✅ core complete | Day 6 |
 | 5 | booking-service | 1 | not started | — |
 | 6 | payment-service | 1 | not started | — |
 | 7 | notification-service | 1 | not started | — |
