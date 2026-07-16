@@ -3,6 +3,7 @@ package com.travel.identity.domain.repository;
 import com.travel.identity.domain.model.Email;
 import com.travel.identity.domain.model.User;
 import com.travel.identity.domain.model.UserId;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
  * Domain code depends on this interface, never on Spring Data or JPA directly.
  * This is the Dependency Inversion Principle applied to persistence.
  */
+@Repository
 public interface UserRepository {
     User             save(User user);
     Optional<User>   findById(UserId id);
