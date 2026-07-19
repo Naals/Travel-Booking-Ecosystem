@@ -7,7 +7,7 @@
 | 3 | api-gateway | 0 | ✅ core complete | Day 5 |
 | 4 | identity-service | 1 | ✅ core complete | Day 6 |
 | 5 | booking-service | 1 | ✅ core complete | Day 7 |
-| 6 | payment-service | 1 | not started | — |
+| 6 | payment-service | 1 | ✅ core complete | Day 8 |
 | 7 | notification-service | 1 | not started | — |
 | 8 | property-service | 2 | not started | — |
 | 9 | hotel-service | 2 | not started | — |
