@@ -20,8 +20,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.travel</groupId>
-      <artifactId>shared-kernel</artifactId>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <optional>true</optional>
     </dependency>
 
     <dependency>
