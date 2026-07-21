@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to TravelPlatform</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; padding: 24px; }
+        .header { background: #1a56db; color: white; padding: 24px; border-radius: 8px 8px 0 0; }
+        .body { background: #f9fafb; padding: 32px; border-radius: 0 0 8px 8px; }
+        .button { display: inline-block; background: #1a56db; color: white;
+            padding: 12px 24px; border-radius: 6px; text-decoration: none;
+            font-weight: bold; margin-top: 16px; }
+        .footer { text-align: center; color: #6b7280; font-size: 12px; margin-top: 24px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 style="margin:0">Welcome to TravelPlatform!</h1>
+    </div>
+    <div class="body">
+        <p>Hi <strong th:text="${fullName}">Traveller</strong>,</p>
+        <p>Your account is ready. Start exploring thousands of properties,
+            hotels, and flights — all in one place.</p>
+        <p>Please verify your email to activate all features:</p>
+        <a class="button" th:href="${verificationUrl}">Verify Email Address</a>
+        <p style="margin-top:24px; color:#6b7280; font-size:13px">
+            If you did not create this account, you can safely ignore this email.
+        </p>
+    </div>
+    <div class="footer">
+        <p>© 2024 TravelPlatform. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>

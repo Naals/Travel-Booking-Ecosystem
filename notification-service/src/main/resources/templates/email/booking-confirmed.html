@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking Confirmed</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 40px auto; padding: 24px; }
+        .header { background: #057a55; color: white; padding: 24px; border-radius: 8px 8px 0 0; }
+        .body { background: #f9fafb; padding: 32px; border-radius: 0 0 8px 8px; }
+        .detail-row { display: flex; justify-content: space-between;
+            padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
+        .label { color: #6b7280; font-size: 14px; }
+        .value { font-weight: bold; }
+        .total { background: #ecfdf5; padding: 16px; border-radius: 6px;
+            margin-top: 16px; text-align: right; }
+        .footer { text-align: center; color: #6b7280; font-size: 12px; margin-top: 24px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1 style="margin:0">✓ Booking Confirmed</h1>
+    </div>
+    <div class="body">
+        <p>Hi <strong th:text="${fullName}">Traveller</strong>,</p>
+        <p>Great news — your booking has been confirmed and payment received.</p>
+
+        <div class="detail-row">
+            <span class="label">Booking ID</span>
+            <span class="value" th:text="${bookingId}">BK-001</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Property</span>
+            <span class="value" th:text="${resourceName}">Cozy Cabin</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Check-in</span>
+            <span class="value" th:text="${checkInDate}">2024-06-15</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Check-out</span>
+            <span class="value" th:text="${checkOutDate}">2024-06-18</span>
+        </div>
+        <div class="detail-row">
+            <span class="label">Guests</span>
+            <span class="value" th:text="${guestCount}">2</span>
+        </div>
+
+        <div class="total">
+            <span class="label">Total paid</span>
+            <span class="value" th:text="${totalAmount + ' ' + currency}">$299.99 USD</span>
+        </div>
+
+        <p style="margin-top:24px">Have a wonderful stay!</p>
+    </div>
+    <div class="footer">
+        <p>© 2024 TravelPlatform. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
