@@ -8,7 +8,7 @@
 | 4 | identity-service | 1 | ✅ core complete | Day 6 |
 | 5 | booking-service | 1 | ✅ core complete | Day 7 |
 | 6 | payment-service | 1 | ✅ core complete | Day 8 |
-| 7 | notification-service | 1 | not started | — |
+| 7 | notification-service | 1 | ✅ core complete | Day 9 |
 | 8 | property-service | 2 | not started | — |
 | 9 | hotel-service | 2 | not started | — |
 | 10 | flight-service | 2 | not started | — |
@@ -29,3 +29,10 @@
 |---|---|---|
 | shared-kernel | ✅ core complete | Day 2 |
 | common-lib | ✅ core complete | Day 3 |
+
+## Tier 1 complete ✅
+End-to-end booking saga is fully operational:
+register → login → create booking → inventory reservation →
+payment charge → booking confirmed → welcome/confirmation emails sent.
+All compensation paths covered: inventory failure, payment failure,
+user-initiated cancellation with automatic refund.

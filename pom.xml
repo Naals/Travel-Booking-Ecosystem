@@ -58,6 +58,7 @@
     <!-- Tier 0 — Platform infrastructure -->
     <module>discovery-server</module>
     <module>config-server</module>
+    <module>api-gateway</module>
 
     <!-- Tier 1 — Core saga (scaffolded, implemented from Day 5) -->
     <module>identity-service</module>
