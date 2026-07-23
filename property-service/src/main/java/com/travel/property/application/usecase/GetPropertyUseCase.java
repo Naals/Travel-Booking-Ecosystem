@@ -5,6 +5,7 @@ import com.travel.property.domain.repository.PropertyRepository;
 import com.travel.property.domain.valueobject.PropertyId;
 import com.travel.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetPropertyUseCase {
 
+    @Qualifier("propertyRepositoryAdapter")
     private final PropertyRepository repository;
 
     @Transactional(readOnly = true)
