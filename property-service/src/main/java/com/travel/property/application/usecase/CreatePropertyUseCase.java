@@ -8,6 +8,7 @@ import com.travel.property.domain.valueobject.*;
 import com.travel.property.infrastructure.messaging.producer.PropertyEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CreatePropertyUseCase {
 
+
+    @Qualifier("propertyRepositoryAdapter")
     private final PropertyRepository    repository;
     private final PropertyEventPublisher eventPublisher;
 
