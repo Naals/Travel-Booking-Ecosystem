@@ -10,7 +10,7 @@
 | 6 | payment-service | 1 | ✅ core complete | Day 8 |
 | 7 | notification-service | 1 | ✅ core complete | Day 9 |
 | 8 | property-service | 2 | ✅ core complete | Day 10 |
-| 9 | hotel-service | 2 | not started | — |
+| 9 | hotel-service | 2 | ✅ core complete | Day 11 |
 | 10 | flight-service | 2 | not started | — |
 | 11 | vehicle-service | 2 | not started | — |
 | 12 | search-service | 2 | not started | — |
