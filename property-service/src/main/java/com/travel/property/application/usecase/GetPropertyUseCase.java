@@ -15,7 +15,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetPropertyUseCase {
 
-    @Qualifier("propertyRepositoryAdapter")
     private final PropertyRepository repository;
 
     @Transactional(readOnly = true)

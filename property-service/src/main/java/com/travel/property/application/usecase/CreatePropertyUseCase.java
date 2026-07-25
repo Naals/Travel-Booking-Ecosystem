@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreatePropertyUseCase {
 
 
-    @Qualifier("propertyRepositoryAdapter")
     private final PropertyRepository    repository;
     private final PropertyEventPublisher eventPublisher;
 

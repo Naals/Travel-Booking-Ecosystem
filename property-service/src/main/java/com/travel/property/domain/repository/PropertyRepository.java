@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface PropertyRepository {
     Property           save(Property property);
     Optional<Property> findById(PropertyId id);

@@ -14,7 +14,6 @@ import java.util.Optional;
  * Domain code depends on this interface, never on Spring Data or JPA directly.
  * This is the Dependency Inversion Principle applied to persistence.
  */
-@Repository
 public interface UserRepository {
     User             save(User user);
     Optional<User>   findById(UserId id);

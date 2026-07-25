@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ActivateHotelUseCase {
 
-    @Qualifier("hotelRepositoryAdapter")
     private final HotelRepository    repository;
     private final HotelEventPublisher eventPublisher;
 

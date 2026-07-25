@@ -14,7 +14,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetHotelUseCase {
 
-    @Qualifier("hotelRepositoryAdapter")
     private final HotelRepository repository;
 
     @Transactional(readOnly = true)

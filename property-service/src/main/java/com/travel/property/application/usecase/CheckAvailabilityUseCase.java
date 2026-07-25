@@ -16,7 +16,6 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class CheckAvailabilityUseCase {
 
-    @Qualifier("propertyRepositoryAdapter")
     private final PropertyRepository repository;
 
     @Transactional(readOnly = true)
