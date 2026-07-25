@@ -7,6 +7,7 @@ import com.travel.hotel.domain.repository.HotelRepository;
 import com.travel.hotel.domain.valueobject.Address;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CreateHotelUseCase {
 
+    @Qualifier("hotelRepositoryAdapter")
     private final HotelRepository repository;
 
     @Transactional

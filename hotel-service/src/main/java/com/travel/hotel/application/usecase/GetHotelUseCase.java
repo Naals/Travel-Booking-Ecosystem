@@ -5,6 +5,7 @@ import com.travel.hotel.domain.repository.HotelRepository;
 import com.travel.hotel.domain.valueobject.HotelId;
 import com.travel.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GetHotelUseCase {
 
+    @Qualifier("hotelRepositoryAdapter")
     private final HotelRepository repository;
 
     @Transactional(readOnly = true)
