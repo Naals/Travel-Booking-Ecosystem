@@ -13,7 +13,7 @@
 | 9 | hotel-service | 2 | ✅ core complete | Day 11 |
 | 10 | flight-service | 2 | ✅ core complete | Day 12 |
 | 11 | vehicle-service | 2 | ✅ core complete | Day 13 |
-| 12 | search-service | 2 | not started | — |
+| 12 | search-service | 2 | ✅ core complete | Day 14 |
 | 13 | user-service | 3 | not started | — |
 | 14 | review-service | 3 | not started | — |
 | 15 | messaging-service | 3 | not started | — |
@@ -30,9 +30,10 @@
 | shared-kernel | ✅ core complete | Day 2 |
 | common-lib | ✅ core complete | Day 3 |
 
-## Tier 2 inventory complete ✅
-All four inventory services participate correctly in the saga:
-property, hotel, flight, and vehicle each consume BookingCreated,
-reserve their respective resource, and publish back to the saga.
-ADR-006 documents the inventory service patterns and resourceId
-encoding convention.
+## Tier 2 complete ✅ (5 of 5 inventory/search services)
+property, hotel, flight, vehicle, and search all operational.
+Every inventory type correctly participates in the booking saga
+(reserve → confirm/release) and is discoverable through the unified
+search-service index. ADR-006 documents inventory patterns; ADR-007
+documents the search index design and its known data-completeness
+gap, with a stated production upgrade path.
