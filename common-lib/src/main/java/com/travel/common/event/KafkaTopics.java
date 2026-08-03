@@ -19,6 +19,9 @@ public final class KafkaTopics {
     public static final String USER_REGISTERED   = "identity.user-registered";
     public static final String USER_UPDATED      = "identity.user-updated";
     public static final String USER_DEACTIVATED  = "identity.user-deactivated";
+    // ── User Profile (engagement) ───────────────────────────────────────────
+    public static final String USER_PROFILE_CREATED      = "user.profile-created";
+    public static final String USER_SAVED_LOCATION_ADDED = "user.saved-location-added";
 
     // ── Booking ──────────────────────────────────────────────────────────────
     public static final String BOOKING_CREATED   = "booking.booking-created";
