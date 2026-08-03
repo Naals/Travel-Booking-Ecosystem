@@ -215,14 +215,15 @@ public class Booking extends AggregateRoot<BookingId> {
 
     /**
      * Guest has checked out — booking is complete.
-     * Raises BookingCompletedEvent → review-service, loyalty-service.
+     * Raises BookingCompletedEvent → review-service, loyalty-service, user-service.
      */
     public void complete() {
         assertStatus(BookingStatus.CONFIRMED, "completion");
         this.status    = BookingStatus.COMPLETED;
         this.updatedAt = Instant.now();
         registerEvent(new BookingCompletedEvent(
-            getId().getValue(), userId, resourceId));
+            getId().getValue(), userId, resourceId,
+            bookingType.name(), resourceName));
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
