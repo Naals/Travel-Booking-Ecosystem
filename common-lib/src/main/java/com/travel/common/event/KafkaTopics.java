@@ -57,6 +57,8 @@ public final class KafkaTopics {
     // ── Review ───────────────────────────────────────────────────────────────
     public static final String REVIEW_CREATED    = "review.review-created";
     public static final String REVIEW_MODERATED  = "review.review-moderated";
+    public static final String REVIEW_FLAGGED           = "review.review-flagged";
+    public static final String RESOURCE_RATING_UPDATED  = "review.resource-rating-updated";
 
     // ── Notification ─────────────────────────────────────────────────────────
     public static final String NOTIFICATION_REQUESTED = "notification.notification-requested";
