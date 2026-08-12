@@ -15,7 +15,7 @@
 | 11 | vehicle-service | 2 | ✅ core complete | Day 13 |
 | 12 | search-service | 2 | ✅ core complete | Day 14 |
 | 13 | user-service | 3 | ✅ core complete | Day 15 |
-| 14 | review-service | 3 | not started | — |
+| 14 | review-service | 3 | ✅ core complete | Day 16 |
 | 15 | messaging-service | 3 | not started | — |
 | 16 | wallet-service | 3 | not started | — |
 | 17 | loyalty-service | 3 | not started | — |
@@ -28,10 +28,12 @@
 | Module | Status | Day |
 |---|---|---|
 | shared-kernel | ✅ core complete | Day 2 |
-| common-lib | ✅ core complete | Day 3 (extended Day 15) |
+| common-lib | ✅ core complete | Day 3 (extended Day 15, Day 16) |
 
-## Tier 3 in progress (1 of 5)
-user-service is the first engagement-tier service: profile, travel
-preferences, saved locations, and a travel-history projection sourced
-from booking-service. SavedLocationAddedEvent is published with no
-current consumer, intentionally, for Tier 4's recommendation-service.
+## Tier 3 in progress (2 of 5)
+review-service is the platform's first MongoDB-backed service (ADR-008).
+Reviews auto-approve unless denylist-flagged; SUPPORT_AGENT/ADMIN
+moderate the queue; a self-consumed Kafka event recomputes each
+resource's rating aggregate. search-service's static `rating` field
+(ADR-007) is not yet wired to this — documented as future work, not
+an oversight.
