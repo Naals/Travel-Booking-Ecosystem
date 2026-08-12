@@ -80,6 +80,10 @@ public final class KafkaTopics {
 
     // ── Messaging ────────────────────────────────────────────────────────────
     public static final String MESSAGE_SENT = "messaging.message-sent";
+    public static final String CONVERSATION_STARTED = "messaging.conversation-started";
+    public static final String CONVERSATION_BLOCKED = "messaging.conversation-blocked";
+    public static final String MESSAGE_DELETED      = "messaging.message-deleted";
+    // MESSAGE_SENT already declared above (Day 3) — first used by this service.
 
     // ── Fraud ────────────────────────────────────────────────────────────────
     public static final String FRAUD_CHECK_REQUESTED = "fraud.check-requested";
