@@ -12,11 +12,6 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-/**
- * Email channel adapter.
- * Renders the Thymeleaf HTML template for the notification type,
- * then sends via Spring's JavaMailSender (SMTP / SendGrid).
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -40,15 +35,12 @@ public class EmailNotificationSender implements NotificationSender {
             Context context = new Context();
             notification.getTemplateVariables().forEach(context::setVariable);
 
-            String htmlBody = templateEngine.process(
-                "email/" + templateName, context);
+            String htmlBody = templateEngine.process("email/" + templateName, context);
 
             MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(
-                message, true, "UTF-8");
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(properties.getFromAddress(),
-                properties.getFromName());
+            helper.setFrom(properties.getFromAddress(), properties.getFromName());
             helper.setTo(notification.getRecipient());
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
@@ -56,14 +48,11 @@ public class EmailNotificationSender implements NotificationSender {
             javaMailSender.send(message);
             notification.markSent();
 
-            log.info("Email sent: type={} to={}",
-                notification.getType(), notification.getRecipient());
+            log.info("Email sent: type={} to={}", notification.getType(), notification.getRecipient());
 
         } catch (Exception ex) {
             log.error("Email send failed: type={} to={} error={}",
-                notification.getType(),
-                notification.getRecipient(),
-                ex.getMessage());
+                notification.getType(), notification.getRecipient(), ex.getMessage());
             notification.markFailed(ex.getMessage());
         }
     }
@@ -76,10 +65,11 @@ public class EmailNotificationSender implements NotificationSender {
             case PAYMENT_FAILED        -> "payment-failed";
             case PAYMENT_REFUNDED      -> "payment-refunded";
             case REVIEW_REQUEST        -> "review-request";
+            case NEW_MESSAGE           -> "new-message";
             case LOYALTY_POINTS_EARNED -> "loyalty-points-earned";
             case LOYALTY_TIER_UPGRADED -> "loyalty-tier-upgraded";
             case PASSWORD_RESET        -> "password-reset";
-            case EMAIL_VERIFICATION ->  "email-verification";
+            case EMAIL_VERIFICATION    -> "email-verification";
         };
     }
 
@@ -91,6 +81,7 @@ public class EmailNotificationSender implements NotificationSender {
             case PAYMENT_FAILED        -> "Payment failed for your booking";
             case PAYMENT_REFUNDED      -> "Your refund has been processed";
             case REVIEW_REQUEST        -> "How was your stay? Leave a review";
+            case NEW_MESSAGE           -> "You have a new message";
             case LOYALTY_POINTS_EARNED -> "You earned loyalty points!";
             case LOYALTY_TIER_UPGRADED -> "Congratulations on your tier upgrade!";
             case PASSWORD_RESET        -> "Reset your password";
