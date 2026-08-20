@@ -72,6 +72,8 @@ public final class KafkaTopics {
     // ── Wallet ───────────────────────────────────────────────────────────────
     public static final String WALLET_CREDITED = "wallet.credited";
     public static final String WALLET_DEBITED  = "wallet.debited";
+    public static final String WALLET_CREATED = "wallet.wallet-created";
+    public static final String WALLET_FROZEN  = "wallet.wallet-frozen";
 
     // ── Loyalty ──────────────────────────────────────────────────────────────
     public static final String LOYALTY_POINTS_EARNED   = "loyalty.points-earned";
