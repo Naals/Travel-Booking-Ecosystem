@@ -17,7 +17,7 @@
 | 13 | user-service | 3 | ✅ core complete | Day 15 |
 | 14 | review-service | 3 | ✅ core complete | Day 16 |
 | 15 | messaging-service | 3 | ✅ core complete | Day 17 |
-| 16 | wallet-service | 3 | not started | — |
+| 16 | wallet-service | 3 | ✅ core complete | Day 18 |
 | 17 | loyalty-service | 3 | not started | — |
 | 18 | recommendation-service | 4 | not started | — |
 | 19 | fraud-service | 4 | not started | — |
@@ -28,25 +28,37 @@
 | Module | Status | Day |
 |---|---|---|
 | shared-kernel | ✅ core complete | Day 2 |
-| common-lib | ✅ core complete | Day 3 (extended Days 15–17) |
+| common-lib | ✅ core complete | Day 3 (extended Days 15–18) |
 
 ## Known issues (tech debt)
 - **Stale `createdAt`/`updatedAt` on reconstitution**: Booking (Day 7),
   Property (Day 10), Hotel (Day 11), Flight (Day 12), Vehicle (Day 13),
   UserProfile (Day 15), and Review (Day 16) all unconditionally set
   `createdAt = Instant.now()` in their private constructors;
-  `reconstitute()` accepts `createdAt`/`updatedAt` parameters but never
-  applies them. Net effect: re-fetching any of these aggregates reports
-  `createdAt` as "now" rather than the true original creation time in
-  API responses. Not a data-loss bug — the correct value is stored
-  correctly in each database — a read-path bug in the domain layer
-  only. Caught while building messaging-service (Day 17), whose
-  `Conversation`/`Message` constructors take `createdAt`/`sentAt`
-  explicitly to avoid it. Back-porting the fix to the services above is
-  scoped as a future hardening pass, not folded into Day 17.
+  `reconstitute()` accepts the true value but never applies it. Fixed
+  going forward starting with Conversation/Message (Day 17) and
+  continued in Wallet (Day 18). Back-porting to the services above is
+  a future hardening pass.
 
-## Tier 3 in progress (3 of 5)
-messaging-service is the platform's second MongoDB-backed service and
-the first with zero Kafka consumers of its own — see its application
-class Javadoc. `MessageSentEvent` reuses `KafkaTopics.MESSAGE_SENT`,
-declared in common-lib since Day 3 and unused until now.
+## Intentional deferrals (see linked ADRs)
+- **search-service's `rating` field** (Day 14, ADR-007) is populated
+  only from hotel-service's static star rating, never from actual
+  review activity — `ResourceRatingUpdatedEvent` (review-service, Day
+    16) is the natural signal to close this gap, not yet consumed.
+- **`PaymentMethod.WALLET`** (payment-service, Day 8) remains
+  unimplemented after wallet-service (Day 18) exists — see ADR-010 for
+  why wiring wallet debit into the booking saga is real future work,
+  not an oversight.
+- **MFA** (identity-service, Day 6): `MfaConfiguration` and
+  `User.enableMfa()` exist in the domain model, but no REST endpoint
+  or use case exposes MFA enrollment, and `SmsNotificationSender`
+  (notification-service, Day 9) is a structured stub with no live
+  Twilio integration.
+
+## Tier 3 in progress (4 of 5)
+wallet-service returns to PostgreSQL after two MongoDB services (Days
+16–17). Auto-provisioned from identity.user-registered like
+user-service (Day 15); balance is a ledger, never a bare mutable
+field — every credit/debit appends a WalletTransaction in the same
+call, backed by a duplicate-reference guard at both the aggregate and
+database level.
