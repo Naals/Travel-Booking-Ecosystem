@@ -79,6 +79,7 @@ public final class KafkaTopics {
     public static final String LOYALTY_POINTS_EARNED   = "loyalty.points-earned";
     public static final String LOYALTY_POINTS_REDEEMED = "loyalty.points-redeemed";
     public static final String LOYALTY_TIER_CHANGED    = "loyalty.tier-changed";
+    public static final String LOYALTY_ACCOUNT_CREATED = "loyalty.account-created";
 
     // ── Messaging ────────────────────────────────────────────────────────────
     public static final String MESSAGE_SENT = "messaging.message-sent";
