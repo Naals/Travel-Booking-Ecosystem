@@ -8,7 +8,7 @@
 | 4 | identity-service | 1 | ✅ core complete | Day 6 |
 | 5 | booking-service | 1 | ✅ core complete | Day 7 (event enriched Day 15) |
 | 6 | payment-service | 1 | ✅ core complete | Day 8 |
-| 7 | notification-service | 1 | ✅ core complete | Day 9 (extended Day 17) |
+| 7 | notification-service | 1 | ✅ core complete | Day 9 (extended Days 17, 19) |
 | 8 | property-service | 2 | ✅ core complete | Day 10 |
 | 9 | hotel-service | 2 | ✅ core complete | Day 11 |
 | 10 | flight-service | 2 | ✅ core complete | Day 12 |
@@ -18,7 +18,7 @@
 | 14 | review-service | 3 | ✅ core complete | Day 16 |
 | 15 | messaging-service | 3 | ✅ core complete | Day 17 |
 | 16 | wallet-service | 3 | ✅ core complete | Day 18 |
-| 17 | loyalty-service | 3 | not started | — |
+| 17 | loyalty-service | 3 | ✅ core complete | Day 19 |
 | 18 | recommendation-service | 4 | not started | — |
 | 19 | fraud-service | 4 | not started | — |
 | 20 | analytics-service | 4 | not started | — |
@@ -28,37 +28,34 @@
 | Module | Status | Day |
 |---|---|---|
 | shared-kernel | ✅ core complete | Day 2 |
-| common-lib | ✅ core complete | Day 3 (extended Days 15–18) |
+| common-lib | ✅ core complete | Day 3 (extended Days 15–19) |
 
 ## Known issues (tech debt)
 - **Stale `createdAt`/`updatedAt` on reconstitution**: Booking (Day 7),
   Property (Day 10), Hotel (Day 11), Flight (Day 12), Vehicle (Day 13),
-  UserProfile (Day 15), and Review (Day 16) all unconditionally set
-  `createdAt = Instant.now()` in their private constructors;
-  `reconstitute()` accepts the true value but never applies it. Fixed
-  going forward starting with Conversation/Message (Day 17) and
-  continued in Wallet (Day 18). Back-porting to the services above is
-  a future hardening pass.
+  UserProfile (Day 15), and Review (Day 16) still discard the true
+  createdAt on reconstitute(). Fixed in every aggregate built since
+  Conversation/Message (Day 17): Wallet (Day 18), LoyaltyAccount
+  (Day 19). Back-porting to the seven listed above remains a future
+  hardening pass.
 
 ## Intentional deferrals (see linked ADRs)
-- **search-service's `rating` field** (Day 14, ADR-007) is populated
-  only from hotel-service's static star rating, never from actual
-  review activity — `ResourceRatingUpdatedEvent` (review-service, Day
-    16) is the natural signal to close this gap, not yet consumed.
-- **`PaymentMethod.WALLET`** (payment-service, Day 8) remains
-  unimplemented after wallet-service (Day 18) exists — see ADR-010 for
-  why wiring wallet debit into the booking saga is real future work,
-  not an oversight.
-- **MFA** (identity-service, Day 6): `MfaConfiguration` and
-  `User.enableMfa()` exist in the domain model, but no REST endpoint
-  or use case exposes MFA enrollment, and `SmsNotificationSender`
-  (notification-service, Day 9) is a structured stub with no live
-  Twilio integration.
+- **search-service's `rating` field** (Day 14, ADR-007): static per
+  hotel, not yet wired to review-service's ResourceRatingUpdatedEvent
+  (Day 16).
+- **`PaymentMethod.WALLET`** (payment-service, Day 8): remains
+  unimplemented after wallet-service (Day 18) — see ADR-010.
+- **MFA** (identity-service, Day 6): domain model exists, no endpoint
+  or live Twilio SMS integration.
+- **Redeemed loyalty points have no destination** (loyalty-service,
+  Day 19): RedeemPointsUseCase debits the ledger only; applying
+  redeemed points to a wallet credit or a booking discount is future
+  work, the same scope limit ADR-010 drew around wallet top-ups.
 
-## Tier 3 in progress (4 of 5)
-wallet-service returns to PostgreSQL after two MongoDB services (Days
-16–17). Auto-provisioned from identity.user-registered like
-user-service (Day 15); balance is a ledger, never a bare mutable
-field — every credit/debit appends a WalletTransaction in the same
-call, backed by a duplicate-reference guard at both the aggregate and
-database level.
+## Tier 3 complete ✅ (5 of 5)
+user-service, review-service, messaging-service, wallet-service, and
+loyalty-service all operational. Three services now auto-provision
+reactively from identity.user-registered (user, wallet, loyalty).
+loyalty-service closes a real Day-9 gap in notification-service:
+NotificationType.LOYALTY_POINTS_EARNED and LOYALTY_TIER_UPGRADED had
+existed as dead enum cases with no template and no producer until today.
