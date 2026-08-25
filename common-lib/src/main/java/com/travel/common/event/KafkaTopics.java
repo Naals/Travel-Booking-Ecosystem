@@ -91,6 +91,7 @@ public final class KafkaTopics {
     // ── Fraud ────────────────────────────────────────────────────────────────
     public static final String FRAUD_CHECK_REQUESTED = "fraud.check-requested";
     public static final String FRAUD_ALERT_RAISED    = "fraud.alert-raised";
+    public static final String FRAUD_RISK_FLAG_CLEARED = "fraud.risk-flag-cleared";
 
     // ── Analytics ────────────────────────────────────────────────────────────
     public static final String ANALYTICS_EVENT = "analytics.platform-event";
