@@ -21,14 +21,14 @@
 | 17 | loyalty-service | 3 | ✅ core complete | Day 19 |
 | 18 | recommendation-service | 4 | ✅ core complete | Day 20 |
 | 19 | fraud-service | 4 | ✅ core complete | Day 21 |
-| 20 | analytics-service | 4 | not started | — |
+| 20 | analytics-service | 4 | ✅ core complete | Day 22 |
 | 21 | audit-service | 4 | not started | — |
 
 ## Shared modules
 | Module | Status | Day |
 |---|---|---|
-| shared-kernel | ✅ core complete | Day 2 |
-| common-lib | ✅ core complete | Day 3 (extended Days 15–19, 21) |
+| shared-kernel | ✅ core complete | Day 2 (eventId/occurredOn first used Day 22) |
+| common-lib | ✅ core complete | Day 3 (extended Days 15–19, 21; ANALYTICS_EVENT retired unused Day 22) |
 
 ## Intentional deferrals (see linked ADRs)
 - **search-service's `rating` field** (Day 14, ADR-007): still static.
@@ -36,14 +36,16 @@
 - **MFA** (identity-service, Day 6): domain model exists, no endpoint or live Twilio integration.
 - **Redeemed loyalty points have no destination** (loyalty-service, Day 19).
 - **FLIGHT bookings excluded from recommendation signals** (Day 20, ADR-012).
-- **`FRAUD_CHECK_REQUESTED`** (declared Day 3): still has no producer after fraud-service — ADR-013.
+- **`FRAUD_CHECK_REQUESTED`** (declared Day 3): no producer exists — ADR-013.
+- **`ANALYTICS_EVENT`** (declared Day 3): formally retired, no producer will ever exist — ADR-014.
+- **`processed_events` has no cleanup job** (analytics-service, Day 22): unbounded growth, flagged — ADR-014.
 
-## Closed loops (cross-service integrations completed after being left open)
-- **user-service's SavedLocationAddedEvent** (Day 15) → first consumed by recommendation-service (Day 20).
-- **wallet-service's WalletFrozenEvent** (Day 18) → first consumed by fraud-service (Day 21), which also gained the ability to *cause* a freeze via a new wallet-service consumer the same day — see ADR-013.
+## Reliability pattern pairs completed
+- **Outbox** (ADR-005, Day 9): guarantees a producer's event is eventually published at-least-once.
+- **Inbox** (ADR-014, Day 22): guarantees a consumer's effect from that event is applied at-most-once. First real use of `DomainEvent.eventId` (shared-kernel, Day 2) — carried in every event since day one, unused by any consumer until today.
 
-## Tier 4 in progress (2 of 4)
-recommendation-service and fraud-service both operational. Two of
-Tier 4's four services now demonstrate the platform's event-driven
-closed-loop pattern working end-to-end without any synchronous
-inter-service call.
+## Tier 4 in progress (3 of 4)
+analytics-service is the third consumer-only service (after search,
+Day 14, and recommendation, Day 20) and the first platform-wide,
+non-per-user Tier 3/4 service — no `identity.user-registered`
+consumer. Only `audit-service` remains to close out all 21 services.
