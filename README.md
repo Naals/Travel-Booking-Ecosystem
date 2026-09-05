@@ -47,6 +47,38 @@ Core domain (18):
 Status of each module is tracked per-commit — see commit history and
 `docs/adr` for the build order rationale (ADR-003).
 
+## Modules
+
+Status: 🚧 core services complete (21/21) — see [`docs/SERVICE_STATUS.md`](./docs/SERVICE_STATUS.md) for per-service detail and remaining hardening work.
+
+| Module | Tier | Purpose |
+|---|---|---|
+| `shared-kernel` | — | DDD base classes: Entity, AggregateRoot, ValueObject, DomainEvent |
+| `common-lib` | — | API response envelope, exception handling, Kafka topic registry |
+| `discovery-server` | 0 | Eureka service registry |
+| `config-server` | 0 | Centralized Spring Cloud Config |
+| `api-gateway` | 0 | Routing, JWT auth, rate limiting, circuit breaking |
+| `identity-service` | 1 | Registration, login, JWT, MFA (partial), RBAC |
+| `booking-service` | 1 | Booking lifecycle and saga coordination |
+| `payment-service` | 1 | Stripe integration, refunds |
+| `notification-service` | 1 | Email/SMS/push, pluggable channel adapters |
+| `property-service` | 2 | Property listings and availability |
+| `hotel-service` | 2 | Hotels, rooms, inventory |
+| `flight-service` | 2 | Flights, routes, seat inventory |
+| `vehicle-service` | 2 | Rental fleet, one-way rentals |
+| `search-service` | 2 | Federated search across all inventory types (Elasticsearch) |
+| `user-service` | 3 | Profile, preferences, saved locations, travel history |
+| `review-service` | 3 | Reviews, moderation, rating aggregation (MongoDB) |
+| `messaging-service` | 3 | User-to-user chat, booking communication (MongoDB) |
+| `wallet-service` | 3 | User wallet balance and transaction ledger |
+| `loyalty-service` | 3 | Reward points and membership tiers |
+| `recommendation-service` | 4 | Personalized and trending destinations |
+| `fraud-service` | 4 | Rule-based risk detection, automated wallet freeze |
+| `analytics-service` | 4 | Platform-wide booking funnel and revenue metrics |
+| `audit-service` | 4 | Hash-chained, tamper-evident compliance trail |
+
+See [`docs/adr`](./docs/adr) for the 15 architecture decision records tracing these choices across the build.
+
 ## Local development
 \`\`\`
 docker compose up -d
