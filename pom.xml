@@ -85,6 +85,8 @@
     <module>fraud-service</module>
     <module>analytics-service</module>
     <module>audit-service</module>
+
+    <module>test-support</module>
   </modules>
 
   <properties>
@@ -100,6 +102,7 @@
     <springdoc.version>2.3.0</springdoc.version>
     <jjwt.version>0.12.5</jjwt.version>
     <stripe.version>24.3.0</stripe.version>
+    <awaitility.version>4.2.0</awaitility.version>
   </properties>
 
   <dependencyManagement>
@@ -154,6 +157,12 @@
         <groupId>com.stripe</groupId>
         <artifactId>stripe-java</artifactId>
         <version>${stripe.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.travel</groupId>
+        <artifactId>test-support</artifactId>
+        <version>${project.version}</version>
+        <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
