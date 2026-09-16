@@ -22,6 +22,12 @@
   <dependencies>
     <dependency>
       <groupId>com.travel</groupId>
+      <artifactId>test-support</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.travel</groupId>
       <artifactId>shared-kernel</artifactId>
       <version>1.0.0-SNAPSHOT</version>
       <scope>compile</scope>
