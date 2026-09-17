@@ -8,22 +8,30 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.kafka.support.KafkaHeaders;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 /**
- * Kafka consumer driving the booking saga state machine.
+ * Reworked Day 24 (ADR-016). Two changes from the Day 7 original:
  *
- * Uses manual acknowledgment — message is only committed after the saga
- * transition succeeds and the aggregate is saved. If processing fails,
- * the message is not acknowledged and will be redelivered (at-least-once).
+ *   1. A new onPaymentInitiated() listener on
+ *      KafkaTopics.PAYMENT_REQUESTED — the saga method existed since
+ *      Day 7 but had no listener wired to it at all.
  *
- * Idempotency: the aggregate state machine enforces this — calling
- * markInventoryReserved() on an already-INVENTORY_RESERVED booking
- * throws BusinessRuleViolationException which is caught and logged here,
- * and the message is acknowledged to prevent infinite retry loops.
+ *   2. handle() no longer catches every exception uniformly. A
+ *      caught-and-logged SagaOutOfOrderException would leave a
+ *      booking stuck forever with no way to self-correct. Now only
+ *      JSON parsing failures (which can never succeed on retry) are
+ *      caught here; everything else — including SagaOutOfOrderException
+ *      — propagates to the container's error handler (see
+ *      KafkaErrorHandlingConfig), which retries the specific record
+ *      with backoff and, if genuinely exhausted, routes it to a .dlq
+ *      topic instead of silently dropping it or blocking the
+ *      partition forever.
+ *
+ * Also switched from hardcoded topic string literals (as Day 7 wrote
+ * them) to the KafkaTopics constants that were declared for these
+ * exact topics since Day 3 — a small consistency fix made while
+ * already touching this file.
  */
 @Slf4j
 @Component
@@ -33,85 +41,60 @@ public class BookingSagaConsumer {
     private final BookingSaga  saga;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(
-        topics  = "inventory.reservation-confirmed",
-        groupId = "booking-saga-group"
-    )
-    public void onInventoryReserved(@Payload String payload,
-                                    @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                                    Acknowledgment ack) {
-        handle(payload, topic, ack, node ->
-            saga.onInventoryReserved(node.get("bookingId").asText()));
+    @KafkaListener(topics = KafkaTopics.INVENTORY_RESERVATION_CONFIRMED, groupId = "booking-saga-group")
+    public void onInventoryReserved(String payload, Acknowledgment ack) {
+        handle(payload, ack, node -> saga.onInventoryReserved(node.get("bookingId").asText()));
     }
 
-    @KafkaListener(
-        topics  = "inventory.reservation-failed",
-        groupId = "booking-saga-group"
-    )
-    public void onInventoryFailed(@Payload String payload,
-                                  @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                                  Acknowledgment ack) {
-        handle(payload, topic, ack, node ->
-            saga.onInventoryUnavailable(
-                node.get("bookingId").asText(),
-                node.path("reason").asText("Resource unavailable")));
+    @KafkaListener(topics = KafkaTopics.INVENTORY_RESERVATION_FAILED, groupId = "booking-saga-group")
+    public void onInventoryFailed(String payload, Acknowledgment ack) {
+        handle(payload, ack, node -> saga.onInventoryUnavailable(
+            node.get("bookingId").asText(), node.path("reason").asText("Resource unavailable")));
     }
 
-    @KafkaListener(
-        topics  = KafkaTopics.PAYMENT_COMPLETED,
-        groupId = "booking-saga-group"
-    )
-    public void onPaymentCompleted(@Payload String payload,
-                                   @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                                   Acknowledgment ack) {
-        handle(payload, topic, ack, node ->
-            saga.onPaymentCompleted(node.get("bookingId").asText()));
+    /** New Day 24 — see class Javadoc. Reuses PAYMENT_REQUESTED (Day 3), the 7th Day-3-seeded constant to finally get a producer AND consumer — see ADR-016. */
+    @KafkaListener(topics = KafkaTopics.PAYMENT_REQUESTED, groupId = "booking-saga-group")
+    public void onPaymentInitiated(String payload, Acknowledgment ack) {
+        handle(payload, ack, node -> saga.onPaymentInitiated(
+            node.get("bookingId").asText(), node.get("paymentId").asText()));
     }
 
-    @KafkaListener(
-        topics  = KafkaTopics.PAYMENT_FAILED,
-        groupId = "booking-saga-group"
-    )
-    public void onPaymentFailed(@Payload String payload,
-                                @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                                Acknowledgment ack) {
-        handle(payload, topic, ack, node ->
-            saga.onPaymentFailed(
-                node.get("bookingId").asText(),
-                node.path("reason").asText("Payment declined")));
+    @KafkaListener(topics = KafkaTopics.PAYMENT_COMPLETED, groupId = "booking-saga-group")
+    public void onPaymentCompleted(String payload, Acknowledgment ack) {
+        handle(payload, ack, node -> saga.onPaymentCompleted(node.get("bookingId").asText()));
     }
 
-    @KafkaListener(
-        topics  = "inventory.reservation-released",
-        groupId = "booking-saga-group"
-    )
-    public void onInventoryReleased(@Payload String payload,
-                                    @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-                                    Acknowledgment ack) {
-        handle(payload, topic, ack, node ->
-            saga.onInventoryReleased(node.get("bookingId").asText()));
+    @KafkaListener(topics = KafkaTopics.PAYMENT_FAILED, groupId = "booking-saga-group")
+    public void onPaymentFailed(String payload, Acknowledgment ack) {
+        handle(payload, ack, node -> saga.onPaymentFailed(
+            node.get("bookingId").asText(), node.path("reason").asText("Payment declined")));
     }
 
-    // ── Private helper ────────────────────────────────────────────────────────
+    @KafkaListener(topics = KafkaTopics.INVENTORY_RESERVATION_RELEASED, groupId = "booking-saga-group")
+    public void onInventoryReleased(String payload, Acknowledgment ack) {
+        handle(payload, ack, node -> saga.onInventoryReleased(node.get("bookingId").asText()));
+    }
 
-    private void handle(String payload, String topic,
-                        Acknowledgment ack, SagaStep step) {
+    private void handle(String payload, Acknowledgment ack, SagaStep step) {
+        JsonNode node;
         try {
-            log.debug("SAGA event from {}: {}", topic, payload);
-            step.execute(objectMapper.readTree(payload));
-            ack.acknowledge();
-        } catch (com.travel.common.exception.BusinessRuleViolationException ex) {
-            // Idempotency guard — transition already applied, safe to ack
-            log.warn("SAGA idempotency guard triggered for topic {}: {}", topic, ex.getMessage());
-            ack.acknowledge();
+            node = objectMapper.readTree(payload);
         } catch (Exception ex) {
-            log.error("SAGA processing failed for topic {}: {}", topic, ex.getMessage(), ex);
-            // Do NOT ack — message will be redelivered
+            // A malformed payload can never parse correctly no matter
+            // how many times it's retried — ack now rather than let
+            // the error handler burn its retry budget on a message
+            // that can never succeed.
+            log.error("Malformed saga event payload, dropping: {}", ex.getMessage(), ex);
+            ack.acknowledge();
+            return;
         }
+
+        step.execute(node); // SagaOutOfOrderException, if thrown, propagates deliberately
+        ack.acknowledge();
     }
 
     @FunctionalInterface
     interface SagaStep {
-        void execute(JsonNode node) throws Exception;
+        void execute(JsonNode node);
     }
 }
