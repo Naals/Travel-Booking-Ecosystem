@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+
 import java.util.List;
 
 @Slf4j
@@ -22,23 +23,21 @@ public class PaymentEventPublisher {
             try {
                 String topic = resolveTopic(event);
                 if (topic == null) { log.warn("No topic for: {}", event.getEventType()); continue; }
-                kafkaTemplate.send(topic, event.getAggregateId(),
-                    objectMapper.writeValueAsString(event));
-                log.debug("Published {} → {}", event.getEventType(), topic);
+                kafkaTemplate.send(topic, event.getAggregateId(), objectMapper.writeValueAsString(event));
             } catch (Exception ex) {
-                log.error("Publish failed for {}: {}", event.getEventType(), ex.getMessage(), ex);
-                throw new RuntimeException("Event publish failed", ex);
+                log.error("Failed to publish {}: {}", event.getEventType(), ex.getMessage());
             }
         }
     }
 
     private String resolveTopic(DomainEvent event) {
         return switch (event.getEventType()) {
+            case "PaymentInitiated"  -> KafkaTopics.PAYMENT_REQUESTED;
             case "PaymentCompleted"  -> KafkaTopics.PAYMENT_COMPLETED;
             case "PaymentFailed"     -> KafkaTopics.PAYMENT_FAILED;
             case "RefundInitiated"   -> KafkaTopics.REFUND_INITIATED;
             case "RefundCompleted"   -> KafkaTopics.REFUND_COMPLETED;
-            default                  -> null;
+            default -> null;
         };
     }
 }
