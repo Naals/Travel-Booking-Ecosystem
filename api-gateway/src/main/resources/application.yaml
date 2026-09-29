@@ -118,6 +118,16 @@ spring:
                 name: flight-cb
                 fallbackUri: forward:/fallback/property
 
+        - id: fraud-service
+          uri: lb://fraud-service
+          predicates:
+            - Path=/api/v1/fraud/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: fraud-cb
+                fallbackUri: forward:/fallback/user
+
         - id: vehicle-service
           uri: lb://vehicle-service
           predicates:
