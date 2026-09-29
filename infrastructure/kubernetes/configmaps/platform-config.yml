@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: travel-platform
+  labels:
+    name: travel-platform
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-config
+  namespace: travel-platform
+data:
+  # Present since Day 4:
+  EUREKA_HOST: "discovery-server"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:29092"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  DB_USERNAME: "postgres"
+  SPRING_PROFILES_ACTIVE: "kubernetes"
+
+  # Added Day 25 — see ADR-017. CONFIG_HOST was missing entirely:
+  # every service's spring.config.import
+  # (optional:configserver:...${CONFIG_HOST:localhost}...) was
+  # silently resolving to localhost INSIDE ITS OWN POD rather than the
+  # real config-server Service DNS name. Because the import is marked
+  # optional:, this failed silently rather than crashing anything —
+  # config-server has simply never been reachable by any service
+  # running in this cluster, on any day since Day 4.
+  CONFIG_HOST: "config-server"
+
+  # MONGO_HOST and ELASTICSEARCH_HOST are new because Tier 2-4
+  # introduced the platform's first Mongo-backed (review-service,
+  # messaging-service — Days 16-17) and Elasticsearch-backed
+  # (search-service — Day 14) services; Tier 0-1 never needed either.
+  # One shared Mongo server hosting two logical databases (ADR-008)
+  # and one shared Elasticsearch cluster — both cluster-wide, not
+  # per-service, which is why they live here rather than in a
+  # per-service env override.
+  MONGO_HOST: "mongodb"
+  ELASTICSEARCH_HOST: "elasticsearch"
