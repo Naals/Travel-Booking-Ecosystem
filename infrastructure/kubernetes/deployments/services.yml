@@ -1,0 +1,111 @@
+---
+# Config Server — added Day 25 (ADR-017). Runnable and Dockerized
+# since Day 4, referenced in CI's docker-build-push matrix since Day
+# 1, but never declared as a Kubernetes Deployment — every other
+# Tier 0-1 service had one; this one was simply missed. 2 replicas:
+# unlike discovery-server (deliberately standalone, register-with-eureka:
+# false — see Day 4), config-server has no such constraint and is
+# trivially horizontally scalable.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-server
+  namespace: travel-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: config-server
+  template:
+    metadata:
+      labels:
+        app: config-server
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8888"
+    spec:
+      containers:
+        - name: config-server
+          image: ghcr.io/travel-platform/config-server:latest
+          ports:
+            - containerPort: 8888
+          envFrom:
+            - configMapRef:
+                name: platform-config
+            - secretRef:
+                name: platform-secrets
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8888
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8888
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+# Notification Service — added Day 25 (ADR-017). Its Service entry
+# (infrastructure/kubernetes/services/services.yml) has existed since
+# Day 4, written speculatively before the service itself was even
+# built (Day 9) — and once it WAS built, the matching Deployment was
+# never added. The Service has been selecting a label with zero Pods
+# behind it this entire time.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: travel-platform
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/actuator/prometheus"
+        prometheus.io/port: "8084"
+    spec:
+      containers:
+        - name: notification-service
+          image: ghcr.io/travel-platform/notification-service:latest
+          ports:
+            - containerPort: 8084
+          envFrom:
+            - configMapRef:
+                name: platform-config
+            - secretRef:
+                name: platform-secrets
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8084
+            initialDelaySeconds: 40
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8084
+            initialDelaySeconds: 90
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 300m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
