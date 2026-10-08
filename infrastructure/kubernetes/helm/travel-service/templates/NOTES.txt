@@ -1,0 +1,11 @@
+{{ include "travel-service.name" . }} deployed to namespace {{ .Release.Namespace }}.
+
+  kubectl get pods -n {{ .Release.Namespace }} -l app={{ include "travel-service.name" . }}
+  kubectl logs -n {{ .Release.Namespace }} -l app={{ include "travel-service.name" . }} -f
+
+Reached internally at:
+  http://{{ include "travel-service.name" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.port }}
+
+External traffic reaches it only through api-gateway's route table
+(api-gateway/src/main/resources/application.yml) — this Service has
+no Ingress of its own, by design.
