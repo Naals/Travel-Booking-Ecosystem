@@ -1,0 +1,264 @@
+name: Travel Platform CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/travel-platform
+  JAVA_VERSION: '21'
+
+jobs:
+  # ── Build & Test ──────────────────────────────────────────────────────────
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          # Tier 0
+          - discovery-server
+          - config-server
+          - api-gateway
+          # Tier 1
+          - identity-service
+          - booking-service
+          - payment-service
+          - notification-service
+          # Tier 2 — added Day 25, were never in this matrix before
+          - property-service
+          - hotel-service
+          - flight-service
+          - vehicle-service
+          - search-service
+          # Tier 3 — added Day 25
+          - user-service
+          - review-service
+          - messaging-service
+          - wallet-service
+          - loyalty-service
+          # Tier 4 — added Day 25
+          - recommendation-service
+          - fraud-service
+          - analytics-service
+          - audit-service
+          # test-support has no matrix entry — it has no src/test of
+          # its own and is pulled in transitively (-am) by every
+          # service above that depends on it at test scope.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK ${{ env.JAVA_VERSION }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+
+      - name: Build and test ${{ matrix.service }}
+        run: |
+          mvn clean verify \
+            -pl common-lib,shared-kernel,test-support,${{ matrix.service }} -am \
+            -Djacoco.skip=false
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.service }}
+          path: ${{ matrix.service }}/target/surefire-reports/
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.service }}
+          path: ${{ matrix.service }}/target/site/jacoco/
+
+  # ── SonarQube Analysis ───────────────────────────────────────────────────
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: maven
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          mvn verify sonar:sonar \
+            -Dsonar.projectKey=travel-platform \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.token=$SONAR_TOKEN \
+            -DskipTests
+
+  # ── Security Scan ────────────────────────────────────────────────────────
+  security-scan:
+    name: Security Scan (Trivy + OWASP)
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'travel-platform'
+          path: '.'
+          format: 'HTML'
+          args: >
+            --enableRetired
+            --failBuildOnCVSS 7
+      - name: Upload OWASP results
+        uses: actions/upload-artifact@v4
+        with:
+          name: owasp-results
+          path: reports/
+
+  # ── Docker Build & Push ──────────────────────────────────────────────────
+  docker-build-push:
+    name: Docker Build & Push
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        service:
+          - discovery-server
+          - config-server
+          - api-gateway
+          - identity-service
+          - booking-service
+          - payment-service
+          - notification-service
+          # Tier 2-4 — added Day 25. Every one of these has shipped a
+          # working Dockerfile since its own build day (Days 10-23);
+          # none of them were ever actually built or pushed by CI
+          # until today.
+          - property-service
+          - hotel-service
+          - flight-service
+          - vehicle-service
+          - search-service
+          - user-service
+          - review-service
+          - messaging-service
+          - wallet-service
+          - loyalty-service
+          - recommendation-service
+          - fraud-service
+          - analytics-service
+          - audit-service
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}
+          tags: |
+            type=sha,prefix=,suffix=,format=short
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Trivy container scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:latest
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+
+  # ── Deploy to Kubernetes ─────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: docker-build-push
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Deploy Tier 0-1 infrastructure (raw manifests)
+        run: |
+          kubectl apply -f infrastructure/kubernetes/configmaps/
+          kubectl apply -f infrastructure/kubernetes/secrets/platform-secrets.yml
+          kubectl apply -f infrastructure/kubernetes/services/
+          kubectl apply -f infrastructure/kubernetes/deployments/
+          kubectl apply -f infrastructure/kubernetes/ingress/
+        # platform-secrets.yml is gitignored (Day 1) and populated onto
+        # the runner by this environment's own secret-injection step —
+        # specific to the hosting org's secret manager, not shown here.
+
+      - name: Deploy Tier 2-4 services (Helm)
+        run: |
+          for svc in property-service hotel-service flight-service vehicle-service search-service \
+                     user-service review-service messaging-service wallet-service loyalty-service \
+                     recommendation-service fraud-service analytics-service audit-service; do
+            helm upgrade --install "$svc" infrastructure/kubernetes/helm/travel-service \
+              -n travel-platform \
+              -f "infrastructure/kubernetes/helm/travel-service/values/${svc}.yaml" \
+              --set image.tag="${{ github.sha }}" \
+              --wait --timeout 5m
+          done
+          # --wait blocks per-service until that Deployment reports
+          # Ready — no separate rollout-status pass needed for these 14.
+
+      - name: Wait for Tier 0-1 rollout
+        run: |
+          kubectl rollout status deployment/discovery-server     -n travel-platform --timeout=300s
+          kubectl rollout status deployment/config-server        -n travel-platform --timeout=300s
+          kubectl rollout status deployment/api-gateway          -n travel-platform --timeout=300s
+          kubectl rollout status deployment/identity-service     -n travel-platform --timeout=300s
+          kubectl rollout status deployment/booking-service      -n travel-platform --timeout=300s
+          kubectl rollout status deployment/payment-service      -n travel-platform --timeout=300s
+          kubectl rollout status deployment/notification-service -n travel-platform --timeout=300s
+
+      - name: Smoke test
+        run: |
+          GATEWAY_URL=$(kubectl get ingress api-gateway-ingress -n travel-platform -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          curl -f http://$GATEWAY_URL/actuator/health || exit 1
