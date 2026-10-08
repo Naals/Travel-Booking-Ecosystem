@@ -1,0 +1,53 @@
+# Defaults shared by every Tier 2-4 service. Each service's own
+# values/<service-name>.yaml overrides only what genuinely differs —
+# name, port, datastore — everything below is the sensible common
+# case, not a placeholder every file has to restate.
+
+nameOverride: ""
+
+image:
+  registry: ghcr.io/travel-platform
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+port: 8080  # every values/<service>.yaml MUST override this
+
+resources:
+  requests:
+    cpu: 300m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+# postgres | mongo | elasticsearch
+datastore:
+  type: postgres
+  dbHost: ""     # required for type: postgres — e.g. "postgres-property"
+  dbName: ""     # required for type: postgres — e.g. "property_db"
+  # Mongo and Elasticsearch hosts are cluster-wide (ADR-008: one
+  # shared Mongo server, two logical DBs; one shared ES cluster) and
+  # come from the platform-config ConfigMap, not from here.
+
+probes:
+  readiness:
+    initialDelaySeconds: 40
+    periodSeconds: 10
+  liveness:
+    initialDelaySeconds: 90
+    periodSeconds: 30
+  # Spring Boot 3 auto-enables the /actuator/health/readiness and
+  # /actuator/health/liveness groups these paths hit once it detects a
+  # Kubernetes environment (KUBERNETES_SERVICE_HOST) — no extra
+  # application.yml config needed, the same assumption Tier 0-1's raw
+  # manifests already made on Day 4.
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+extraEnv: []  # beyond platform-config/platform-secrets and the datastore block — empty for most services
