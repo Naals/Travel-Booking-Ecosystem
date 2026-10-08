@@ -1,0 +1,21 @@
+nameOverride: search-service
+port: 8089
+datastore:
+  type: elasticsearch
+# The platform's flagship HPA example — "search traffic vs. booking
+# traffic have wildly different profiles" was the original rationale
+# for microservices in the first place (ADR-001). This is the first
+# service in the platform to actually act on that with autoscaling
+# rather than a fixed replica count.
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 60
+resources:
+  requests:
+    cpu: 400m
+    memory: 768Mi
+  limits:
+    cpu: 1500m
+    memory: 1536Mi

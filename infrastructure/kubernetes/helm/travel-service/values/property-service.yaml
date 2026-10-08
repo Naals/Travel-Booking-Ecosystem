@@ -1,0 +1,6 @@
+nameOverride: hotel-service
+port: 8086
+datastore:
+  type: postgres
+  dbHost: postgres-hotel
+  dbName: hotel_db

@@ -1,0 +1,6 @@
+nameOverride: flight-service
+port: 8087
+datastore:
+  type: postgres
+  dbHost: postgres-flight
+  dbName: flight_db

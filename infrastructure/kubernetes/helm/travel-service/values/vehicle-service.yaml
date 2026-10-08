@@ -1,0 +1,6 @@
+nameOverride: vehicle-service
+port: 8088
+datastore:
+  type: postgres
+  dbHost: postgres-vehicle
+  dbName: vehicle_db
