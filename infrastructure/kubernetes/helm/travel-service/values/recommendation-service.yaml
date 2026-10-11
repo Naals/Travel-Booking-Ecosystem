@@ -1,0 +1,6 @@
+nameOverride: recommendation-service
+port: 8095
+datastore:
+  type: postgres
+  dbHost: postgres-recommendation
+  dbName: recommendation_db

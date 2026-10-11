@@ -1,0 +1,12 @@
+nameOverride: audit-service
+port: 8098
+datastore:
+  type: postgres
+  dbHost: postgres-audit
+  dbName: audit_db
+# Note: ADR-015's single locked chain-head row means extra replicas
+# do NOT increase append throughput — every write still serializes on
+# that one Postgres row lock regardless of pod count. Replicas here
+# buy availability and read-endpoint capacity (audit trail queries,
+# integrity checks), not write parallelism. Left at the chart default
+# rather than tuned up for that reason.

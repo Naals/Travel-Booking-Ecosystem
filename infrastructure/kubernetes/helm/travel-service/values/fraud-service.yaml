@@ -1,0 +1,6 @@
+nameOverride: fraud-service
+port: 8096
+datastore:
+  type: postgres
+  dbHost: postgres-fraud
+  dbName: fraud_db

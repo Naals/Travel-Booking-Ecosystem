@@ -1,0 +1,6 @@
+nameOverride: analytics-service
+port: 8097
+datastore:
+  type: postgres
+  dbHost: postgres-analytics
+  dbName: analytics_db
