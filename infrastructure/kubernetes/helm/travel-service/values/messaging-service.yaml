@@ -1,0 +1,4 @@
+nameOverride: messaging-service
+port: 8092
+datastore:
+  type: mongo

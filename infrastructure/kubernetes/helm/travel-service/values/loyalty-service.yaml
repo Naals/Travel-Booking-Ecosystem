@@ -1,0 +1,6 @@
+nameOverride: loyalty-service
+port: 8094
+datastore:
+  type: postgres
+  dbHost: postgres-loyalty
+  dbName: loyalty_db

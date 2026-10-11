@@ -1,0 +1,6 @@
+nameOverride: wallet-service
+port: 8093
+datastore:
+  type: postgres
+  dbHost: postgres-wallet
+  dbName: wallet_db

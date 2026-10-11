@@ -1,0 +1,7 @@
+nameOverride: review-service
+port: 8091
+datastore:
+  type: mongo
+  # MONGO_HOST is cluster-wide, from platform-config (ADR-008) — the
+  # db name (review_db) is baked into this service's own Mongo URI in
+  # application.yml, not passed as a separate env var.

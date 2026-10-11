@@ -1,0 +1,6 @@
+nameOverride: user-service
+port: 8090
+datastore:
+  type: postgres
+  dbHost: postgres-user
+  dbName: user_db
